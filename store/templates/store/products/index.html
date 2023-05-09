@@ -1,0 +1,42 @@
+{% extends 'store/tobe/main.html' %}
+
+{% block content %}
+
+
+<div class="py-4 bg-primary">
+    <div class= "container">
+        <a class="text-white text-decoration-none" href= "{% url 'home' %}"> Home / </a>
+        <a class="text-white text-decoration-none" href= "{% url 'collections' %}"> Collections / </a>
+        <a class="text-white text-decoration-none" href= "{% url 'collectionsview' cname.slug%}"> {{cname.name}} </a>
+    </div>
+</div>
+
+<div class = "container">
+    <div class = "row">
+        <div class = "col-md-12">
+            <h2> {{cname.name}} </h2>
+            <hr>
+            <div class = "row">
+                {% for item in prod  %}
+                    <div class = "col-md-3">
+                        <div class = "card">
+                            <a href="{% url 'productview' item.subcategory.slug item.slug %}" class="text-center text-decoration-none">
+                            <div class = "card-body">
+                                <div class = "category-image">
+                                    <img src = "{{ item.product_image.url}}" alt= "prod image" class="card-img-top"/>
+                                </div>
+                                <h4 class="text-center text-decoration-none"> {{item.slug}} </h4>
+                                <span class = "text-center text-decoration-none">{{item.priceDepot}}</span></br>
+                                <span>{{item.priceSell}}</span>
+                                
+                            </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock content %}

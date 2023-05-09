@@ -1,0 +1,220 @@
+{% extends 'store/tobe/main.html' %} {% block content %}
+
+<div class="py-3 bg-primary">
+  <div class="container">
+    <a class="text-white text-decoration-none" href="{% url 'home' %}">
+      Home /
+    </a>
+    <a class="text-white text-decoration-none" href="{% url 'checkout' %}">
+      Checkout /
+    </a>
+  </div>
+</div>
+
+<div class="container my-3">
+  <form action="{% url 'placeorder' %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-7">
+        <div class="card shadow checkoutform">
+          <div class="card-body">
+            <h6>Basic Details</h6>
+            <hr />
+            <div class="row">
+              <div class="col-md-6">
+                <label> First Name </label>
+                <input
+                  value="{{request.user.first_name}}"
+                  required
+                  type="text"
+                  name="fname"
+                  class="form-control"
+                  placeholder="Enter First Name"
+                />
+              </div>
+              <div class="col-md-6">
+                <label> Last Name </label>
+                <input
+                  value="{{request.user.last_name}}"
+                  required
+                  type="text"
+                  name="lname"
+                  class="form-control"
+                  placeholder="Enter Last Name"
+                />
+              </div>
+              <div class="col-md-6 mt-2">
+                <label> Email </label>
+                <input
+                  value="{{request.user.email}}"
+                  required
+                  type="text"
+                  name="email"
+                  class="form-control"
+                  placeholder="Enter Email"
+                />
+              </div>
+              <div class="col-md-6 mt-2">
+                <label> Phone </label>
+                <input
+                  value="{{userprofile.phone}}"
+                  required
+                  type="text"
+                  name="phone"
+                  class="form-control"
+                  placeholder="Enter Phone"
+                />
+              </div>
+              <div class="col-md-6 mt-2">
+                <label> Country </label>
+                <input
+                  value="{{userprofile.country}}"
+                  required
+                  type="text"
+                  name="country"
+                  class="form-control"
+                  placeholder="Enter Country"
+                />
+              </div>
+              <div class="col-md-6 mt-2">
+                <label> City </label>
+                <input
+                  value="{{userprofile.city}}"
+                  required
+                  type="text"
+                  name="city"
+                  class="form-control"
+                  placeholder="Enter City"
+                />
+              </div>
+              <div class="col-md-12 mt-2">
+                <label> ZIP Code</label>
+                <input
+                  value="{{userprofile.zipcode}}"
+                  required
+                  type="text"
+                  name="zipcode"
+                  class="form-control"
+                  placeholder="Enter ZIP Code"
+                />
+              </div>
+              <div class="col-md-12 mt-2">
+                <label> Adresse </label>
+                <input
+                  value="{{userprofile.address}}"
+                  required
+                  type="text"
+                  name="address"
+                  class="form-control"
+                  placeholder="Enter Adresse"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card shadow">
+          <div class="card-body">
+            <h6>Order Summary</h6>
+            <hr />
+            {% if cartitems %}
+            <table class="table table-stripeds table-bordereds">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cartitems%}
+                <tr>
+                  <td>
+                    <img
+                      src="{{item.product.product_image.url}}"
+                      width="50"
+                      height="50"
+                      class="me-2"
+                    />
+                    {{item.product.name}}
+                  </td>
+                  <td>{{item.product_qty}}</td>
+                  <td>{{item.product.priceSell | stringformat:'d'}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <h6 class="fw-bold">
+              Grand Total
+              <span class="float-end">
+                MAD {{total_price | stringformat:'d'}}</span
+              >
+            </h6>
+            <div class="mt-3">
+              <input type="hidden" value="COD" name="payment_mode" />
+              <button type="submit" class="btn btn-success w-100">
+                Place Order
+              </button>
+              <div id="paypal-button-container"></div>
+            </div>
+            {% else %}
+            <h4>Your cart is Empty</h4>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock content %} {% block scripts %}
+<script src="https://www.paypal.com/sdk/js?client-id=AdBoauGOkPDhPSpcY-VSeQQ9Q6CR2KK5Wc0E44QOFNM5cdTfzOIMU0wSDYzSYtVJ0Da4xSTdH_-Ihiyf&currency=USD"></script>
+<script>
+    paypal.Buttons({
+      // Order is created on the server and the order id is returned
+      createOrder() {
+        return fetch("/my-server/create-paypal-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // use the "body" param to optionally pass additional order information
+          // like product skus and quantities
+          body: JSON.stringify({
+            cart: [
+              {
+                sku: "YOUR_PRODUCT_STOCK_KEEPING_UNIT",
+                quantity: "YOUR_PRODUCT_QUANTITY",
+              },
+            ],
+          }),
+        })
+        .then((response) => response.json())
+        .then((order) => order.id);
+      },
+      // Finalize the transaction on the server after payer approval
+      onApprove(data) {
+        return fetch("/my-server/capture-paypal-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderID: data.orderID
+          })
+        })
+        .then((response) => response.json())
+        .then((orderData) => {
+          // Successful capture! For dev/demo purposes:
+          console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          const transaction = orderData.purchase_units[0].payments.captures[0];
+          alert(`Transaction ${transaction.status}: ${transaction.id}\n\nSee console for all available details`);
+          // When ready to go live, remove the alert and show a success message within this page. For example:
+          // const element = document.getElementById('paypal-button-container');
+          // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+          // Or go to another URL:  window.location.href = 'thank_you.html';
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+{% endblock scripts %}
