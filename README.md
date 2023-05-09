@@ -6,7 +6,6 @@ Raissi Zakaria
 Mohamed Taha Zenjari
 <br>
 Hamza Moussebbih
-<hr>
 ## Diagramme de Sequence
 <br>
 <img width="436" alt="MicrosoftTeams-image" src="https://github.com/zakaria0101/ecommerce-django/assets/68571374/45ddf82f-00ea-4675-bdda-5bd63559669f">
